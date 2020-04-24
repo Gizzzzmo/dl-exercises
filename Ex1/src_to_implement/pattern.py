@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 class Checker:
     def __init__(self, resolution, tile_size):
         if (resolution % (2*tile_size) != 0):
-            raise Exception('resolution must be evenly divisible by the two times the tile_size')
+            raise Exception('resolution must be evenly divisible by two times the tile_size')
         self.resolution = resolution
         self.tile_size = tile_size
         self.output = np.empty((resolution, resolution))

@@ -2,8 +2,7 @@ import os.path
 import json
 import glob
 import random
-import cv2
-import scipy.misc
+from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -54,7 +53,7 @@ class ImageGenerator:
             random.shuffle(self.files)
         else:
             self.currentfile += self.batch_size
-        images = [self.augment(cv2.resize(np.load(file), dsize=tuple(self.image_size[0:2]))) for file in files]
+        images = [self.augment(np.array(Image.fromarray(np.load(file)).resize(self.image_size[0:2]))) for file in files]
         labels = np.array([self.labels[file.split('/')[-1].split('.')[0]] for file in files])
         
         batch = np.stack(images)
@@ -66,7 +65,7 @@ class ImageGenerator:
         # (mirroring and/or rotation) on it and outputs the transformed image
         #TODO: implement augmentation function
         if self.mirroring:
-            mirror = random.choice([0, 1, 2])
+            mirror = random.choice([0, 1, 2]) if not self.rotation else random.choice([0, 1])
             if (mirror == 1):
                 img = img[::-1, :]
             elif (mirror == 2):

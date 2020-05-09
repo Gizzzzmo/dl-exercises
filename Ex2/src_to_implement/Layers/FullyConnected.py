@@ -23,7 +23,7 @@ class FullyConnected:
         output_size = error_tensor.shape[1]
         amount = self.last_input.shape[0]
         gradient = np.empty_like(self.weights)
-        gradient[:, -1] = error_tensor.sum(axis=0)/len(error_tensor)
+        gradient[:, -1] = error_tensor.sum(axis=0)
         differential = error_tensor.reshape(amount, output_size, 1) @ self.last_input.reshape(amount, 1, input_size)
         gradient[:, :-1] = differential.sum(axis=0)
         self.gradient_weights = gradient

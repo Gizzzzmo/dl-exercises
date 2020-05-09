@@ -5,6 +5,8 @@ import numpy as np
 import NeuralNetwork
 import matplotlib.pyplot as plt
 
+ID = 1  # identifier for dispatcher
+
 class TestFullyConnected(unittest.TestCase):
     def setUp(self):
         self.batch_size = 9
@@ -26,6 +28,7 @@ class TestFullyConnected(unittest.TestCase):
     def test_backward_size(self):
         layer = FullyConnected.FullyConnected(self.input_size, self.output_size)
         output_tensor = layer.forward(self.input_tensor)
+        # print(output_tensor.shape)
         error_tensor = layer.backward(output_tensor)
         self.assertEqual(error_tensor.shape[1], self.input_size)
         self.assertEqual(error_tensor.shape[0], self.batch_size)
@@ -135,7 +138,6 @@ class TestSoftMax(unittest.TestCase):
         loss_layer.forward(pred, self.label_tensor)
         error = loss_layer.backward(self.label_tensor)
         error = layer.backward(error)
-        print(error.sum())
         self.assertAlmostEqual(np.sum(error), 0)
 
     def test_regression_high_loss(self):
@@ -238,7 +240,7 @@ class TestCrossEntropyLoss(unittest.TestCase):
         layers = list()
         layers.append(Loss.CrossEntropyLoss())
         difference = Helpers.gradient_check(layers, input_tensor, self.label_tensor)
-        self.assertLessEqual(np.sum(difference), 1e-5)
+        self.assertLessEqual(np.sum(difference), 1e-4)
 
     def test_zero_loss(self):
         layer = Loss.CrossEntropyLoss()

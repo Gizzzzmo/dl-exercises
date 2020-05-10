@@ -19,4 +19,5 @@ class SoftMax:
         differential = -term1.reshape(amount, classes, 1) @ self.last_exp.reshape(amount, 1, classes)
         differential.reshape(amount, classes**2)[:, ::classes+1] = diagonal
 
+        #return self.last_exp * (error_tensor - (self.last_exp * error_tensor).sum(axis=1).reshape(amount, 1))
         return (error_tensor.reshape(amount, 1, classes) @ differential).reshape(amount, classes)

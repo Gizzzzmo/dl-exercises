@@ -26,6 +26,7 @@ class NeuralNetwork:
     def train(self, iterations):
         for _ in range(iterations):
             self.loss.append(self.forward())
+            self.backward()
 
     def test(self, input_tensor):
         return reduce(lambda result, layer: layer.forward(result), [input_tensor] + self.layers)

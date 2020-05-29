@@ -9,7 +9,8 @@ class Pooling:
     def forward(self, input_tensor):
         last_dims = tuple( math.ceil((inshape - pool + 1)/stride) for stride, pool, inshape in zip(self.stride_shape, self.pooling_shape, input_tensor.shape[2:]))
         output_tensor = np.empty((*input_tensor.shape[0:2], *last_dims))
-        self.last_index_tensor = np.empty_like(output_tensor, dtype=int)
+        self.last_index_y = np.empty_like(output_tensor, dtype=int)
+        self.last_index_x = np.empty_like(output_tensor, dtype=int)
         self.last_shape = input_tensor.shape
         
         for i in range(output_tensor.shape[2]):
@@ -19,22 +20,22 @@ class Pooling:
                 xstart = j*self.stride_shape[1]
                 xend = xstart + self.pooling_shape[1]
                 pool = input_tensor[:, :, ystart:yend, xstart:xend].reshape(len(input_tensor), input_tensor.shape[1], -1)
-                output_tensor[:, :, i, j] = np.max(pool, axis=2)
-                self.last_index_tensor[:, :, i, j] = np.argmax(pool, axis=-1)
+                output_tensor[:, :, i, j] = np.max(pool, axis=-1)
+                
+                index_y, index_x = np.unravel_index(np.argmax(pool, axis=-1), self.pooling_shape)
+                self.last_index_y[:, :, i, j] = index_y + ystart
+                self.last_index_x[:, :, i, j] = index_x + xstart
 
         return output_tensor
 
     def backward(self, error_tensor):
+
         differential = np.zeros(self.last_shape)
-        for k, sample_error in enumerate(error_tensor):
-            for l, pool_error in enumerate(sample_error):
-                for i in range(error_tensor.shape[2]):
-                    for j in range(error_tensor.shape[3]):
-                        ystart = i*self.stride_shape[0]
-                        xstart = j*self.stride_shape[1]
-                        index = self.last_index_tensor[k, l, i, j]
-                        yindex = ystart + index//self.stride_shape[0]
-                        xindex = xstart + index%self.stride_shape[0]
-                        differential[k, l, yindex, xindex] +=pool_error[i, j]
-                        
+        ind_samples = np.tile(np.arange(error_tensor.shape[0]), (error_tensor.shape[1], 1)).transpose()
+        ind_channels = np.tile(np.arange(error_tensor.shape[1]), (error_tensor.shape[0], 1))
+        
+        for i in range(error_tensor.shape[2]):
+            for j in range(error_tensor.shape[3]):
+                differential[ind_samples, ind_channels, self.last_index_y[:, :, i, j], self.last_index_x[:, :, i, j]] += error_tensor[:, :, i, j]
+                                
         return differential

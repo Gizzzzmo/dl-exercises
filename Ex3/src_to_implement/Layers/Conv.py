@@ -108,6 +108,6 @@ class Conv:
                 if len(last_dims) == 1:
                     differential[i, j] = signal.convolve(error, kernel, mode='same')[self.num_kernels//2]
                 else:
-                    differential[i, j] = signal.correlate(error, kernel, mode='same')[self.num_kernels//2]
+                    differential[i, j] = signal.convolve(error, kernel[::-1], mode='same')[self.num_kernels//2]
         
         return differential

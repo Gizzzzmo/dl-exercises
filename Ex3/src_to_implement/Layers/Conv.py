@@ -47,6 +47,7 @@ class Conv:
         self.last_input_shape = input_tensor.shape
         amount = len(input_tensor)
         channels = input_tensor.shape[1]
+        
         paddedrest = tuple(inp + ker-1 for inp, ker in zip(input_tensor.shape[2:], self.weights.shape[2:]))
         self.last_input_padded = np.zeros((amount, channels, *paddedrest))
         if len(input_tensor.shape) == 3:
